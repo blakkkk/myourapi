@@ -19,9 +19,6 @@ class DatabaseController:
 
     def run_query(self, query_string, arguments):
 
-        print(query_string)
-        print(arguments)
-
         query_type = query_string.split(' ')[0].upper()
 
         if query_type == "INSERT":
@@ -34,7 +31,7 @@ class DatabaseController:
             self.cursor.execute(query_string, arguments)
             self.db.commit()
 
-            return "{'INSERT SUCCESS'}"
+            return '{"results": ["Insert successful"]}'
 
         except sqlite3.OperationalError as e:
             return "{'sqlerror': '" + e.args[0] + "'}"
