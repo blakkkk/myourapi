@@ -59,15 +59,7 @@ class OurApiHandler(BaseHTTPRequestHandler):
             return
 
         # Read Post variables
-        query_args = {}
-
-        form = cgi.FieldStorage(
-            fp=self.rfile,
-            headers=self.headers,
-            environ={'REQUEST_METHOD': 'POST'}
-        )
-        for key in form.keys():
-            query_args[key] = form[key].value
+        query_args = dict(parse_qsl(urlparse(self.path).query))
 
         self.handle_new_request(query_function, query_args, 'POST')
 
@@ -102,6 +94,18 @@ class OurApiHandler(BaseHTTPRequestHandler):
         self.wfile.write(result_json.encode('utf-8'))
 
         return False
+
+    def method_match(self, request_type, query_method):
+        if request_type in query_method:
+            return True
+        else:
+            result_json = 'API Method mismatch, require: ' \
+                          + ','.join(query_method) \
+                          + '\nMethod Type Used: ' \
+                          + request_type
+            self._set_invalid_method_response()
+            self.wfile.write(result_json.encode('utf-8'))
+            return False
 
     def request_query_has_errors(self, query_function, query_args):
         config_args = self.definitions_dict[query_function]
@@ -153,6 +157,9 @@ class OurApiHandler(BaseHTTPRequestHandler):
 
     def _set_path_not_found_response(self):
         self._set_response(404)
+
+    def _set_invalid_method_response(self):
+        self._set_response(405)
 
     def set_definitions(self, definitions):
         self.definitions = definitions
