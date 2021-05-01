@@ -21,17 +21,17 @@ class DatabaseController:
 
         query_type = query_string.split(' ')[0].upper()
 
-        if query_type == "INSERT":
-            return self.run_insert(query_string, arguments)
+        if query_type == "INSERT" or query_type == "UPDATE" or query_type == "DELETE":
+            return self.run_cud(query_string, arguments, query_type)
         else:
             return self.run_select(query_string, arguments)
 
-    def run_insert(self, query_string, arguments):
+    def run_cud(self, query_string, arguments, query_type):
         try:
             self.cursor.execute(query_string, arguments)
             self.db.commit()
 
-            return '{"results": ["Insert successful"]}'
+            return f'{{"results": ["{query_type} successful"]}}'
 
         except sqlite3.OperationalError as e:
             return "{'sqlerror': '" + e.args[0] + "'}"
