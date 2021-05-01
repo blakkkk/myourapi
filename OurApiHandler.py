@@ -58,13 +58,23 @@ class OurApiHandler(BaseHTTPRequestHandler):
         if isinstance(query_function, bool) and not query_function:
             return
 
-        # Read Post variables
-        query_args = dict(parse_qsl(urlparse(self.path).query))
+        # Read Post Variables
+        query_args = {}
+
+        form = cgi.FieldStorage(
+            fp=self.rfile,
+            headers=self.headers,
+            environ={'REQUEST_METHOD': 'POST'}
+        )
+        for key in form.keys():
+            query_args[key] = form[key].value
+
+        # Read Post variables alternative
+        # query_args = dict(parse_qsl(urlparse(self.path).query))
 
         self.handle_new_request(query_function, query_args, 'POST')
 
         return
-
 
     def do_GET(self):
         # check the path is correct
